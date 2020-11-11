@@ -411,15 +411,7 @@ auto UnrealLoader::load_mesh_actor_entities(
         surface.index_count = unreal_surface->triangle_max * 3;
 
         if (collides(*mesh_actor, material)) {
-          const auto shader = material.material.as<unreal::Shader>();
-
-          // TODO: Dead branch.
-          if (false && shader &&
-              (shader->two_sided || shader->treat_as_two_sided)) {
-            surface.material.color = {1.0f, 0.7f, 0.9f};
-          } else {
-            surface.material.color = {1.0f, 0.6f, 0.6f};
-          }
+          surface.material.color = {1.0f, 0.6f, 0.6f};
         } else {
           surface.type |= SURFACE_PASSABLE;
           surface.material.color = {0.7f, 1.0f, 0.7f};

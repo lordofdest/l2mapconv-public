@@ -111,8 +111,8 @@ void L2JSerializer::serialize(const Geodata &geodata,
         for (auto cx = 0; cx < block_width_cells; ++cx) {
           for (auto cy = 0; cy < block_height_cells; ++cy) {
             const auto column_index =
-                (y * block_width_cells) + cy +
-                ((x * block_height_cells) + cx) * map_height_cells;
+                (y * block_height_cells) + cy +
+                ((x * block_width_cells) + cx) * map_width_cells;
             const auto &column = columns[column_index];
 
             output.put(column.layers);
@@ -158,7 +158,7 @@ auto L2JSerializer::read_complex_block_cell(std::istream &input,
 
   return {
       static_cast<std::int16_t>(x * block_width_cells + cx),
-      static_cast<std::int16_t>(y * block_width_cells + cy),
+      static_cast<std::int16_t>(y * block_height_cells + cy),
       z,
       static_cast<BlockType>(type),
       (nswe & 0x8) != 0,
