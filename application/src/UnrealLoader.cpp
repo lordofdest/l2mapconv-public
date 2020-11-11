@@ -149,23 +149,23 @@ auto UnrealLoader::load_terrain_entities(
 
         if (!terrain.edge_turn_bitmap[x + y * width]) {
           // First part of quad.
-          mesh->indices.push_back(x + y * width);
-          mesh->indices.push_back((x + 1) + y * width);
+          mesh->indices.push_back((x + 0) + (y + 0) * width);
+          mesh->indices.push_back((x + 1) + (y + 0) * width);
           mesh->indices.push_back((x + 1) + (y + 1) * width);
 
           // Second part of quad.
-          mesh->indices.push_back(x + y * width);
+          mesh->indices.push_back((x + 0) + (y + 0) * width);
           mesh->indices.push_back((x + 1) + (y + 1) * width);
-          mesh->indices.push_back(x + (y + 1) * width);
+          mesh->indices.push_back((x + 0) + (y + 1) * width);
         } else {
           // First part of quad.
-          mesh->indices.push_back(x + (y + 1) * width);
-          mesh->indices.push_back(x + y * width);
-          mesh->indices.push_back((x + 1) + y * width);
+          mesh->indices.push_back((x + 0) + (y + 1) * width);
+          mesh->indices.push_back((x + 0) + (y + 0) * width);
+          mesh->indices.push_back((x + 1) + (y + 0) * width);
 
           // Second part of quad.
-          mesh->indices.push_back(x + (y + 1) * width);
-          mesh->indices.push_back((x + 1) + y * width);
+          mesh->indices.push_back((x + 0) + (y + 1) * width);
+          mesh->indices.push_back((x + 1) + (y + 0) * width);
           mesh->indices.push_back((x + 1) + (y + 1) * width);
         }
       }
@@ -196,14 +196,14 @@ auto UnrealLoader::load_terrain_entities(
 
         // First part of quad.
         if (x != width - 1) {
-          mesh->indices.push_back(x + (y - 1) * width);
+          mesh->indices.push_back((x + 0) + (y - 1) * width);
           mesh->indices.push_back((x + 1) + (y - 1) * width);
           mesh->indices.push_back(mesh->vertices.size() - 1);
         }
 
         // Second part of quad.
         if (x != 0) {
-          mesh->indices.push_back(x + (y - 1) * width);
+          mesh->indices.push_back((x + 0) + (y - 1) * width);
           mesh->indices.push_back(mesh->vertices.size() - 1);
           mesh->indices.push_back(mesh->vertices.size() - 2);
         }
@@ -235,14 +235,14 @@ auto UnrealLoader::load_terrain_entities(
 
         // First part of quad.
         if (y != height - 1) {
-          mesh->indices.push_back((x - 1) + y * width);
+          mesh->indices.push_back((x - 1) + (y + 0) * width);
           mesh->indices.push_back(mesh->vertices.size() - 1);
           mesh->indices.push_back((x - 1) + (y + 1) * width);
         }
 
         // Second part of quad.
         if (y != 0) {
-          mesh->indices.push_back((x - 1) + y * width);
+          mesh->indices.push_back((x - 1) + (y + 0) * width);
           mesh->indices.push_back(mesh->vertices.size() - 2);
           mesh->indices.push_back(mesh->vertices.size() - 1);
         }
@@ -286,7 +286,7 @@ auto UnrealLoader::load_terrain_entities(
 
   // Normals.
   for (std::size_t i = 0; i < mesh->indices.size() / 3; ++i) {
-    const auto index0 = mesh->indices[i * 3];
+    const auto index0 = mesh->indices[i * 3 + 0];
     const auto index1 = mesh->indices[i * 3 + 1];
     const auto index2 = mesh->indices[i * 3 + 2];
 
@@ -319,7 +319,6 @@ auto UnrealLoader::load_terrain_entities(
   // Bounding box entity.
   Entity bb_entity{bounding_box_mesh(SURFACE_TERRAIN, mesh->bounding_box)};
   bb_entity.wireframe = true;
-
   entities.push_back(std::move(bb_entity));
 
   return entities;
@@ -399,7 +398,7 @@ auto UnrealLoader::load_mesh_actor_entities(
                   .indices[unreal_surface->first_index + i * 3 + 1]);
           mesh->indices.push_back(
               unreal_mesh->index_stream
-                  .indices[unreal_surface->first_index + i * 3]);
+                  .indices[unreal_surface->first_index + i * 3 + 0]);
         }
 
         // Surface.
@@ -412,16 +411,18 @@ auto UnrealLoader::load_mesh_actor_entities(
         surface.index_count = unreal_surface->triangle_max * 3;
 
         if (collides(*mesh_actor, material)) {
-          surface.material.color = {1.0f, 0.6f, 0.6f};
+          const auto shader = material.material.as<unreal::Shader>();
+
+          // TODO: Dead branch.
+          if (false && shader &&
+              (shader->two_sided || shader->treat_as_two_sided)) {
+            surface.material.color = {1.0f, 0.7f, 0.9f};
+          } else {
+            surface.material.color = {1.0f, 0.6f, 0.6f};
+          }
         } else {
           surface.type |= SURFACE_PASSABLE;
           surface.material.color = {0.7f, 1.0f, 0.7f};
-        }
-
-        const auto shader = material.material.as<unreal::Shader>();
-
-        if (shader && (shader->two_sided || shader->treat_as_two_sided)) {
-          surface.material.color = {1.0f, 0.7f, 0.9f};
         }
 
         mesh->surfaces.push_back(surface);
@@ -431,14 +432,12 @@ auto UnrealLoader::load_mesh_actor_entities(
     // Static mesh entity.
     Entity entity{cached_mesh->second};
     place_actor(*mesh_actor, entity);
-
     entities.push_back(std::move(entity));
 
     // Bounding box entity.
     Entity bb_entity{cached_bb_mesh->second};
     bb_entity.wireframe = true;
     place_actor(*mesh_actor, bb_entity);
-
     entities.push_back(std::move(bb_entity));
   }
 

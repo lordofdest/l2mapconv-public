@@ -104,7 +104,7 @@ auto Archive::operator>>(Index &index) -> Archive & {
   *this >> byte;
 
   const auto negative = (byte & (1 << 7)) != 0;
-  auto value = byte & 0x3F;
+  auto value = byte & 0x3f;
 
   if ((byte & (1 << 6)) != 0) {
     auto shift = 6;
@@ -112,7 +112,7 @@ auto Archive::operator>>(Index &index) -> Archive & {
     do {
       auto data = 0;
       *this >> byte;
-      data = byte & 0x7F;
+      data = byte & 0x7f;
       data <<= shift;
       value |= data;
       shift += 7;

@@ -2,9 +2,8 @@
 
 #include <glm/glm.hpp>
 
-#include <math/Box.h>
-
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 namespace geodata {
@@ -16,16 +15,13 @@ struct Vertex {
 
 struct Mesh {
   std::vector<Vertex> vertices;
-  std::vector<std::uint32_t> indices;
-  std::vector<glm::mat4> model_matrices;
-  math::Box bounding_box;
+  std::vector<unsigned int> indices;
+  std::vector<glm::mat4> instance_matrices;
 };
 
 struct Entity {
-  Mesh mesh;
-  glm::vec3 position;
-  glm::vec3 rotation;
-  glm::vec3 scale;
+  std::shared_ptr<Mesh> mesh;
+  glm::mat4 model_matrix;
 };
 
 } // namespace geodata

@@ -2,7 +2,7 @@
 
 #include "Context.h"
 #include "DrawableMesh.h"
-#include "GeodataBlock.h"
+#include "GeodataCell.h"
 #include "Mesh.h"
 #include "MeshSurface.h"
 
@@ -16,8 +16,7 @@ namespace rendering {
 
 class GeodataMesh : public utils::NonCopyable, public DrawableMesh {
 public:
-  explicit GeodataMesh(Context &context,
-                       const std::vector<GeodataBlock> &blocks,
+  explicit GeodataMesh(Context &context, const std::vector<GeodataCell> &cells,
                        const MeshSurface &surface,
                        const math::Box &bounding_box);
 
@@ -31,7 +30,7 @@ private:
   std::vector<MeshSurface> m_surfaces;
   math::Box m_bounding_box;
 
-  auto vertex_buffer(const std::vector<GeodataBlock> &blocks) -> VertexBuffer;
+  auto vertex_buffer(const std::vector<GeodataCell> &cells) -> VertexBuffer;
 };
 
 } // namespace rendering

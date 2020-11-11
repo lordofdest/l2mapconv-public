@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "ApplicationContext.h"
 #include "CameraSystem.h"
+#include "GeodataContext.h"
+#include "GeodataSystem.h"
 #include "LoadingSystem.h"
 #include "RenderingContext.h"
 #include "RenderingSystem.h"
@@ -29,14 +31,18 @@ auto Application::run() -> int {
   // Make sure to remove systems & contexts before OpenGL context will be
   // destroyed.
   {
-    std::vector<std::unique_ptr<System>> systems;
 
+    // Initialize contexts.
     ApplicationContext application_context{};
     WindowContext window_context{};
     UIContext ui_context{};
     RenderingContext rendering_context{};
+    GeodataContext geodata_context{};
 
-    application_context.running = true;
+    Renderer renderer{rendering_context};
+
+    // Initialize systems.
+    std::vector<std::unique_ptr<System>> systems;
 
     systems.push_back(
         std::make_unique<WindowSystem>(window_context, application_context,
@@ -47,8 +53,13 @@ auto Application::run() -> int {
         rendering_context, window_context, ui_context));
     systems.push_back(std::make_unique<CameraSystem>(
         rendering_context, window_context, ui_context));
-    systems.push_back(std::make_unique<LoadingSystem>(rendering_context,
+    systems.push_back(std::make_unique<LoadingSystem>(geodata_context, renderer,
                                                       root_path, map_names));
+    systems.push_back(
+        std::make_unique<GeodataSystem>(geodata_context, ui_context, renderer));
+
+    // Run application.
+    application_context.running = true;
 
     for (const auto &system : systems) {
       system->start();

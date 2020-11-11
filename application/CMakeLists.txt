@@ -11,9 +11,12 @@ add_executable(${PROJECT_NAME}
     src/UISystem.cpp
     src/CameraSystem.cpp
     src/LoadingSystem.cpp
+    src/GeodataSystem.cpp
 
     src/UnrealLoader.cpp
-    src/GeodataLoader.cpp
+    src/GeodataEntityFactory.cpp
+
+    src/Renderer.cpp
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.h)

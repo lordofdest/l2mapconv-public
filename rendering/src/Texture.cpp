@@ -29,17 +29,14 @@ Texture::Texture(Context &context, Format format, int width, int height,
     case Format::DXT3: {
       internal_format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
       block_size = 16;
-      break;
-    }
+    } break;
     case Format::DXT5: {
       internal_format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
       block_size = 16;
-      break;
-    }
+    } break;
     case Format::DXT1:
-    case Format::RGBA: {
+    case Format::RGBA:
       break;
-    }
     }
 
     const auto size = (width / 4) * (height / 4) * block_size;

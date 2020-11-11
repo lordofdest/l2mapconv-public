@@ -1,1 +1,1 @@
-Place L2J geodata files here.
+Place reference geodata files here.

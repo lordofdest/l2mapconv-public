@@ -62,7 +62,7 @@ enum PackageFlags {
 };
 
 struct PackageHeader {
-  static constexpr std::int32_t PACKAGE_MAGIC = 0x9E2A83C1;
+  static constexpr std::int32_t PACKAGE_MAGIC = 0x9e2a83c1;
 
   std::int32_t magic;
   std::int16_t file_version;

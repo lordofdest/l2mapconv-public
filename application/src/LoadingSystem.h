@@ -1,25 +1,24 @@
 #pragma once
 
-#include "Entity.h"
-#include "RenderingContext.h"
+#include "GeodataContext.h"
+#include "Map.h"
+#include "Renderer.h"
 #include "System.h"
 
-#include <rendering/Texture.h>
-
 #include <filesystem>
-#include <memory>
 #include <string>
 #include <vector>
 
 class LoadingSystem : public System {
 public:
-  explicit LoadingSystem(RenderingContext &rendering_context,
+  explicit LoadingSystem(GeodataContext &geodata_context,
+                         const Renderer &renderer,
                          const std::filesystem::path &root_path,
                          const std::vector<std::string> &map_names);
 
 private:
-  RenderingContext &m_rendering_context;
+  GeodataContext &m_geodata_context;
+  const Renderer &m_renderer;
 
-  auto load_texture(const Texture &texture)
-      -> std::shared_ptr<rendering::Texture>;
+  void prebuild_maps(const std::vector<Map> &maps) const;
 };

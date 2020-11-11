@@ -51,21 +51,17 @@ void PropertyExtractor::deserialize(Property &property) const {
   switch (property.type) {
   case PropertyType::Byte: {
     m_archive >> property.uint8_t_value;
-    break;
-  }
+  } break;
   case PropertyType::Int: {
     m_archive >> property.int32_t_value;
-    break;
-  }
+  } break;
   case PropertyType::Float: {
     m_archive >> property.float_value;
-    break;
-  }
+  } break;
   case PropertyType::Object:
   case PropertyType::Name: {
     m_archive >> property.index_value;
-    break;
-  }
+  } break;
   case PropertyType::Array: {
     const auto start_position = input.tellg();
     m_archive >> property.array_size;
@@ -89,8 +85,7 @@ void PropertyExtractor::deserialize(Property &property) const {
                  array_size);
     }
 
-    break;
-  }
+  } break;
   case PropertyType::Struct: {
     if (property.struct_name == "Rotator") {
       m_archive >> property.rotator_value;
@@ -103,17 +98,13 @@ void PropertyExtractor::deserialize(Property &property) const {
           << "Skipping struct: " << property.struct_name << std::endl;
       input.seekg(property.size, std::ios::cur);
     }
-
-    break;
-  }
+  } break;
   case PropertyType::Vector: {
     m_archive >> property.vector_value;
-    break;
-  }
+  } break;
   case PropertyType::Rotator: {
     m_archive >> property.rotator_value;
-    break;
-  }
+  } break;
   default: {
     utils::Log(utils::LOG_DEBUG, "Unreal")
         << "Skipping property type: " << static_cast<int>(property.type)
@@ -131,36 +122,28 @@ auto PropertyExtractor::extract_size(std::uint8_t size_type) const
   switch (size_type) {
   case 0: {
     size = 1;
-    break;
-  }
+  } break;
   case 1: {
     size = 2;
-    break;
-  }
+  } break;
   case 2: {
     size = 4;
-    break;
-  }
+  } break;
   case 3: {
     size = 12;
-    break;
-  }
+  } break;
   case 4: {
     size = 16;
-    break;
-  }
+  } break;
   case 5: {
     m_archive >> extract<llvm::ulittle8_t>(size);
-    break;
-  }
+  } break;
   case 6: {
     m_archive >> extract<llvm::ulittle16_t>(size);
-    break;
-  }
+  } break;
   case 7: {
     m_archive >> size;
-    break;
-  }
+  } break;
   default: {
     ASSERT(false, "Unreal", "Unknown property size type: " << size_type);
   }

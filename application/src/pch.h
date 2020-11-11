@@ -18,7 +18,7 @@
 #include <rendering/EntityTree.h>
 #include <rendering/ErrorHandling.h>
 #include <rendering/FrameSettings.h>
-#include <rendering/GeodataBlock.h>
+#include <rendering/GeodataCell.h>
 #include <rendering/GeodataMesh.h>
 #include <rendering/Material.h>
 #include <rendering/MeshSurface.h>
@@ -27,8 +27,11 @@
 #include <rendering/TextureLoader.h>
 #include <rendering/Vertex.h>
 
+#include <geodata/Builder.h>
+#include <geodata/Exporter.h>
 #include <geodata/Geodata.h>
 #include <geodata/Loader.h>
+#include <geodata/Map.h>
 
 #include <utils/Assert.h>
 #include <utils/Log.h>
@@ -51,6 +54,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <memory>

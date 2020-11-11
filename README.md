@@ -5,7 +5,7 @@
     <img src="assets/toi.png" width="400" />
 </p>
 
-Lineage II geodata generator... someday.
+Lineage II geodata builder.
 
 Tested with clients:
 
@@ -14,16 +14,12 @@ Tested with clients:
 
 ## Features
 
-- Map rendering
-- L2J geodata preview
-
-## Todo
-
-- [ ] Geodata generation
+- Map rendering.
+- L2J geodata building and preview.
 
 ## Usage
 
-1. *Optional*. Place L2J geodata files in the `geodata` directory.
+1. *Optional*. Place L2J geodata files in the `geodata` directory for preview.
 2. Run `l2mapconv` providing path to the client and map names:
 
 ```sh
@@ -31,6 +27,8 @@ Tested with clients:
 ```
 
 3. Use WASD, RMB, Shift and Alt to control camera.
+4. Press Build button to build geodata.
+5. See results in the `output` directory.
 
 ## Building
 
@@ -43,7 +41,7 @@ Requirements:
 - Ninja 1.10
 
 ```sh
-> git clone git@github.com:madyanov/l2mapconv-public.git
+> git clone --recurse-submodules -j8 git@github.com:madyanov/l2mapconv-public.git
 > cd l2mapconv-public
 > cmake -H. -G Ninja -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang.exe"
 > cd build
@@ -52,7 +50,9 @@ Requirements:
 
 ## Credits
 
+- [Recast](https://github.com/recastnavigation/recastnavigation)
 - [L2PackageTools](https://github.com/Bigcheese/L2PackageTools)
 - [l2mapper](https://github.com/justgos/l2mapper)
 - [UEViewer](https://github.com/gildor2/UEViewer)
-- UE 2004
+- [UT Package Tool](https://www.acordero.org/projects/unreal-tournament-package-tool)
+- UT 2003
