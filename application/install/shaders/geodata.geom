@@ -11,6 +11,8 @@ uniform mat4 u_view;
 uniform mat4 u_projection;
 uniform mat4 u_model;
 
+float cell_size = 16.0f;
+
 void main() {
     vec3 quad[4] = vec3[](
         vec3(-1.0f, 1.0f, 0.0f),
@@ -32,8 +34,8 @@ void main() {
     int type = v_block[0].w & 0xff;
     int nswe = v_block[0].w >> 16;
 
-    float scale = type == 0 ? 63.0f : 7.0f;
-    vec3 center = vec3(x * 16.0f + scale, y * 16.0f + scale, z - 16.0f);
+    float scale = type == 0 ? cell_size * 4.0f - 1.0f : cell_size / 2.0f - 1.0f;
+    vec3 center = vec3(x * cell_size + scale, y * cell_size + scale, z - 16.0f);
 
     if ((nswe & 0x1) != 0) {
         uvs[0].x += 0.5f;

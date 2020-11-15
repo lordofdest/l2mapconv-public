@@ -115,7 +115,13 @@ auto UnrealLoader::load_terrain_entities(
   const auto width = terrain.terrain_map->u_size;
   const auto height = terrain.terrain_map->v_size;
 
+  // Size with edges.
+  const auto full_width = width + 1;
+  const auto full_height = height + 1;
+
   const auto mesh = std::make_shared<EntityMesh>();
+
+  std::vector<std::uint16_t> heights((width + 1) * (height + 1));
 
   {
     const auto position = to_vec3(terrain.position());
@@ -137,6 +143,8 @@ auto UnrealLoader::load_terrain_entities(
             {glm::vec3{x, y, heightmap[y * width + x]} * scale + position,
              {0.0f, 0.0f, 0.0f},
              {x, y}});
+
+        heights[y * full_width + x] = heightmap[y * width + x];
       }
     }
 
@@ -194,6 +202,8 @@ auto UnrealLoader::load_terrain_entities(
              {0.0f, 0.0f, 0.0f},
              {x, y}});
 
+        heights[y * full_width + x] = heightmap[x];
+
         // First part of quad.
         if (x != width - 1) {
           mesh->indices.push_back((x + 0) + (y - 1) * width);
@@ -232,6 +242,8 @@ auto UnrealLoader::load_terrain_entities(
             {glm::vec3{x, y, heightmap[y * width]} * scale + position,
              {0.0f, 0.0f, 0.0f},
              {x, y}});
+
+        heights[y * full_width + x] = heightmap[y * width];
 
         // First part of quad.
         if (y != height - 1) {
@@ -272,6 +284,8 @@ auto UnrealLoader::load_terrain_entities(
            {0.0f, 0.0f, 0.0f},
            {x, y}});
 
+      heights[y * full_width + x] = heightmap[0];
+
       // First part of quad.
       mesh->indices.push_back((x - 1) + (y - 1) * width);
       mesh->indices.push_back(mesh->vertices.size() - 2);
@@ -284,23 +298,32 @@ auto UnrealLoader::load_terrain_entities(
     }
   }
 
-  // Normals.
-  for (std::size_t i = 0; i < mesh->indices.size() / 3; ++i) {
-    const auto index0 = mesh->indices[i * 3 + 0];
-    const auto index1 = mesh->indices[i * 3 + 1];
-    const auto index2 = mesh->indices[i * 3 + 2];
+  {
+    // Normals.
+    for (auto y = 0; y < full_height; ++y) {
+      for (auto x = 0; x < full_width; ++x) {
+        const float z = heights[y * full_width + x];
 
-    const auto normal = glm::normalize(glm::cross(
-        mesh->vertices[index0].position - mesh->vertices[index2].position,
-        mesh->vertices[index1].position - mesh->vertices[index0].position));
+        auto top = y > 0 ? heights[(y - 1) * full_width + x] : z;
+        auto bottom = y < height ? heights[(y + 1) * full_width + x] : z;
+        auto left = x > 0 ? heights[y * full_width + (x - 1)] : z;
+        auto right = x < width ? heights[y * full_width + (x + 1)] : z;
 
-    mesh->vertices[index0].normal += normal;
-    mesh->vertices[index1].normal += normal;
-    mesh->vertices[index2].normal += normal;
-  }
+        const auto normal = glm::normalize(
+            glm::vec3{(left - right) / (full_width * 2.0f),
+                      (top - bottom) / (full_height * 2.0f), 4.0f});
 
-  for (auto &vertex : mesh->vertices) {
-    vertex.normal = glm::normalize(vertex.normal);
+        if (x < width && y <= height) {
+          mesh->vertices[y * width + x].normal = normal;
+        } else if (x == width && y == height) {
+          // Southeast.
+          mesh->vertices[y * full_width + x].normal = normal;
+        } else if (x == width) {
+          // East.
+          mesh->vertices[full_height * width + y].normal = normal;
+        }
+      }
+    }
   }
 
   // Surface.

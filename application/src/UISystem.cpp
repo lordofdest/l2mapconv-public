@@ -19,12 +19,11 @@ UISystem::UISystem(UIContext &ui_context, WindowContext &window_context,
   ImGui::StyleColorsDark();
 
   // Default rendering settings.
+  m_ui_context.rendering.culling = true;
   m_ui_context.rendering.terrain = true;
   m_ui_context.rendering.static_meshes = true;
   m_ui_context.rendering.csg = true;
   m_ui_context.rendering.exported_geodata = true;
-
-  m_ui_context.geodata.export_ = true;
 
   // Default geodata settings.
   reset_geodata_settings();
@@ -64,6 +63,7 @@ void UISystem::rendering_window(Timestep frame_time) const {
   ImGui::Text("\tx: %d", static_cast<int>(camera_position.x));
   ImGui::Text("\ty: %d", static_cast<int>(camera_position.y));
   ImGui::Text("\tz: %d", static_cast<int>(camera_position.z));
+  ImGui::Checkbox("Culling", &m_ui_context.rendering.culling);
   ImGui::Checkbox("Wireframe", &m_ui_context.rendering.wireframe);
   ImGui::Checkbox("Passable", &m_ui_context.rendering.passable);
   ImGui::Checkbox("Terrain", &m_ui_context.rendering.terrain);
@@ -82,7 +82,8 @@ void UISystem::geodata_window() const {
   ImGui::InputFloat("Cell Size", &m_ui_context.geodata.cell_size);
   ImGui::InputFloat("Cell Height", &m_ui_context.geodata.cell_height);
   ImGui::InputFloat("Walkable Height", &m_ui_context.geodata.walkable_height);
-  ImGui::InputFloat("Walkable Slope", &m_ui_context.geodata.walkable_slope);
+  ImGui::InputFloat("Wall Angle", &m_ui_context.geodata.wall_angle);
+  ImGui::InputFloat("Walkable Angle", &m_ui_context.geodata.walkable_angle);
   ImGui::InputFloat("Min Walkable Climb",
                     &m_ui_context.geodata.min_walkable_climb);
   ImGui::InputFloat("Max Walkable Climb",
@@ -111,10 +112,11 @@ void UISystem::geodata_window() const {
 }
 
 void UISystem::reset_geodata_settings() const {
-  m_ui_context.geodata.cell_size = 16.0f;
-  m_ui_context.geodata.cell_height = 4.0f;
-  m_ui_context.geodata.walkable_height = 48.0f;
-  m_ui_context.geodata.walkable_slope = 45.0f;
-  m_ui_context.geodata.min_walkable_climb = 16.0f;
-  m_ui_context.geodata.max_walkable_climb = 24.0f;
+  m_ui_context.geodata.cell_size = 8.0f;
+  m_ui_context.geodata.cell_height = 1.0f;
+  m_ui_context.geodata.walkable_height = 46.0f;
+  m_ui_context.geodata.wall_angle = 87.5f;
+  m_ui_context.geodata.walkable_angle = 45.0f;
+  m_ui_context.geodata.min_walkable_climb = 10.0f;
+  m_ui_context.geodata.max_walkable_climb = 16.0f;
 }

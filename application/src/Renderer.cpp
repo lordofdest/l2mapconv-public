@@ -3,9 +3,6 @@
 #include "Renderer.h"
 
 void Renderer::render_maps(const std::vector<Map> &maps) const {
-  utils::Log(utils::LOG_INFO, "App")
-      << "Prepare maps for rendering" << std::endl;
-
   const auto entity_shader = m_shader_loader.load_entity_shader("entity");
 
   std::unordered_map<std::shared_ptr<EntityMesh>,
@@ -76,9 +73,6 @@ void Renderer::render_maps(const std::vector<Map> &maps) const {
 
 void Renderer::render_geodata(
     const std::vector<Entity<GeodataMesh>> &geodata_entities) const {
-
-  utils::Log(utils::LOG_INFO, "App")
-      << "Prepare geodata for rendering" << std::endl;
 
   const auto geodata_shader = m_shader_loader.load_entity_shader("geodata");
   const auto nswe_texture = m_texture_loader.load_texture("nswe.png");

@@ -25,6 +25,12 @@ auto Application::run() -> int {
 
   const auto root_path = m_arguments[0];
 
+  if (!std::filesystem::exists(root_path)) {
+    utils::Log(utils::LOG_ERROR)
+        << "L2 root path not found: " << root_path << std::endl;
+    return EXIT_FAILURE;
+  }
+
   auto map_names = m_arguments;
   map_names.erase(map_names.begin());
 
@@ -46,7 +52,7 @@ auto Application::run() -> int {
 
     systems.push_back(
         std::make_unique<WindowSystem>(window_context, application_context,
-                                       ui_context, "l2mapconv", 960, 720));
+                                       ui_context, "l2mapconv", 1440, 1000));
     systems.push_back(std::make_unique<UISystem>(ui_context, window_context,
                                                  rendering_context));
     systems.push_back(std::make_unique<RenderingSystem>(

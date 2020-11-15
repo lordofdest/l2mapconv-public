@@ -17,9 +17,9 @@ void Exporter::export_l2j_geodata(const std::string &name,
                                   const Geodata &geodata) const {
 
   const auto l2j_path = m_root_path / (name + ".l2j");
+  std::ofstream output{l2j_path, std::ios::binary};
 
   L2JSerializer serializer;
-  std::ofstream output{l2j_path, std::ios::binary};
   serializer.serialize(geodata, output);
 
   utils::Log(utils::LOG_INFO, "Geodata")

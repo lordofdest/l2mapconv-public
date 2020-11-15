@@ -1,20 +1,23 @@
 #include "pch.h"
 
-#include "Postprocessing.h"
+#include "Preprocessing.h"
 
 #include <geodata/Builder.h>
 
 namespace geodata {
 
+static constexpr auto destination_cell_size = 16.0f;
+
 auto Builder::build(const Map &map, const BuilderSettings &settings) const
     -> Geodata {
 
-  // Configure.
-  const auto cell_size = settings.cell_size;
+  // Configuration.
+  const auto source_cell_size = settings.cell_size;
   const auto cell_height = settings.cell_height;
   const auto walkable_height =
       static_cast<int>(std::ceil(settings.walkable_height / cell_height));
-  const auto walkable_slope = settings.walkable_slope;
+  const auto wall_angle = settings.wall_angle;
+  const auto walkable_angle = settings.walkable_angle;
   const auto min_walkable_climb =
       static_cast<int>(std::floor(settings.min_walkable_climb / cell_height));
   const auto max_walkable_climb =
@@ -27,18 +30,26 @@ auto Builder::build(const Map &map, const BuilderSettings &settings) const
   float bb_max[3] = {source_bb_max[0], source_bb_max[2], source_bb_max[1]};
 
   // Calculate grid size.
-  auto width = 0;
-  auto height = 0;
+  auto source_width = 0;
+  auto source_height = 0;
   rcCalcGridSize(static_cast<float *>(bb_min), static_cast<float *>(bb_max),
-                 cell_size, &width, &height);
+                 source_cell_size, &source_width, &source_height);
+
+  // Destination grid size.
+  auto destination_width = 0;
+  auto destination_height = 0;
+  rcCalcGridSize(static_cast<float *>(bb_min), static_cast<float *>(bb_max),
+                 destination_cell_size, &destination_width,
+                 &destination_height);
 
   rcContext context{};
 
-  // Create heightfield.
-  auto *hf = rcAllocHeightfield();
-  rcCreateHeightfield(&context, *hf, width, height,
+  // Create source heightfield.
+  auto *source_hf = rcAllocHeightfield();
+  rcCreateHeightfield(&context, *source_hf, source_width, source_height,
                       static_cast<float *>(bb_min),
-                      static_cast<float *>(bb_max), cell_size, cell_height);
+                      static_cast<float *>(bb_max), source_cell_size,
+                      cell_height);
 
   // Prepare geometry data.
   const auto *vertices = glm::value_ptr(map.vertices().front());
@@ -47,52 +58,62 @@ auto Builder::build(const Map &map, const BuilderSettings &settings) const
   const auto triangle_count = map.indices().size() / 3;
 
   // Rasterize triangles.
-  auto areas = std::make_unique<unsigned char[]>(triangle_count);
-  mark_triangles(walkable_slope, vertices, triangles, triangle_count,
-                 areas.get());
-  rcRasterizeTriangles(&context, vertices, vertex_count, triangles, areas.get(),
-                       triangle_count, *hf, min_walkable_climb);
+  std::vector<unsigned char> areas(triangle_count);
+  mark_triangles(walkable_angle, wall_angle, vertices, triangles,
+                 triangle_count, &areas.front());
+  rcRasterizeTriangles(&context, vertices, vertex_count, triangles,
+                       &areas.front(), triangle_count, *source_hf, 0);
+
+  // Create destination heightfield.
+  auto *destination_hf = rcAllocHeightfield();
+  rcCreateHeightfield(&context, *destination_hf, destination_width,
+                      destination_height, static_cast<float *>(bb_min),
+                      static_cast<float *>(bb_max), destination_cell_size,
+                      cell_height);
+  merge_heightfields(&context, *source_hf, *destination_hf, min_walkable_climb);
+  rcFreeHeightField(source_hf);
 
   // Filter low height spans.
-  rcFilterWalkableLowHeightSpans(&context, walkable_height, *hf);
+  rcFilterWalkableLowHeightSpans(&context, walkable_height, *destination_hf);
 
   // Calculate NSWE.
-  calculate_nswe(*hf, walkable_height, min_walkable_climb, max_walkable_climb);
+  calculate_nswe(*destination_hf, walkable_height, min_walkable_climb,
+                 max_walkable_climb);
 
   // Convert heightfield to geodata.
   Geodata geodata;
 
   const auto depth = static_cast<int>((bb_max[2] - bb_min[2]) / cell_height);
-  const auto z_offset = 7; // TODO: Calculate by cell_height.
 
-  for (auto y = 0; y < height; ++y) {
-    for (auto x = 0; x < width; ++x) {
-      for (auto *span = hf->spans[x + y * width]; span != nullptr;
-           span = span->next) {
+  for (auto y = 0; y < destination_hf->height; ++y) {
+    for (auto x = 0; x < destination_hf->width; ++x) {
+      for (auto *span = destination_hf->spans[x + y * destination_hf->width];
+           span != nullptr; span = span->next) {
 
-        const auto area = span->area & 0x3;
-        const auto nswe = span->area >> 2;
+        const auto area = static_cast<int>(span->area) & 0xf;
+        const auto nswe = static_cast<int>(span->area) >> 4;
 
-        if (area == RC_NULL_AREA || nswe == 0) {
+        if (area == RC_NULL_AREA) {
           continue;
         }
+
+        const auto z = static_cast<int>(span->smax) - depth / 2 + 1;
 
         geodata.cells.push_back({
             x,
             y,
-            static_cast<int>((span->smax - depth / 2 + z_offset) * cell_height),
+            static_cast<int>(static_cast<float>(z) * cell_height) + 28,
             BLOCK_MULTILAYER,
-            (nswe & 0x8) != 0,
-            (nswe & 0x2) != 0,
-            (nswe & 0x1) != 0,
-            (nswe & 0x4) != 0,
+            (nswe & DIRECTION_N) != 0,
+            (nswe & DIRECTION_W) != 0,
+            (nswe & DIRECTION_E) != 0,
+            (nswe & DIRECTION_S) != 0,
         });
       }
     }
   }
 
-  // Cleanup.
-  rcFreeHeightField(hf);
+  rcFreeHeightField(destination_hf);
 
   return geodata;
 }

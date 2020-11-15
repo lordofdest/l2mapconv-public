@@ -33,6 +33,7 @@ void RenderingSystem::frame_begin(Timestep /*frame_time*/) {
 void RenderingSystem::frame_end(Timestep /*frame_time*/) {
   rendering::FrameSettings settings{};
   settings.wireframe = m_ui_context.rendering.wireframe;
+  settings.culling = m_ui_context.rendering.culling;
 
   if (m_ui_context.rendering.passable) {
     settings.surface_filter |= SURFACE_PASSABLE;

@@ -5,6 +5,7 @@
 struct UIContext {
   struct {
     int draws;
+    bool culling;
     bool wireframe;
     bool passable;
     bool terrain;
@@ -19,7 +20,8 @@ struct UIContext {
     float cell_size;
     float cell_height;
     float walkable_height;
-    float walkable_slope;
+    float wall_angle;
+    float walkable_angle;
     float min_walkable_climb;
     float max_walkable_climb;
     std::function<void()> build_handler;
