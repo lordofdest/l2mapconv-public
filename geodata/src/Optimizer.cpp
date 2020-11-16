@@ -13,17 +13,16 @@ static constexpr auto SIMPLE_BLOCK_MAX_HEIGHT_DIFFERENCE = 32;
 void Optimizer::optimize() {
   for (auto x = 0; x < MAP_WIDTH_BLOCKS; ++x) {
     for (auto y = 0; y < MAP_HEIGHT_BLOCKS; ++y) {
-      auto &block = m_buffer.block(x, y);
       if (is_multilayer_block(x, y)) {
-        block.type = BLOCK_MULTILAYER;
+        m_buffer.set_block_type(x, y, BLOCK_MULTILAYER);
       } else {
         const auto [is_simple, new_z] = is_simple_block(x, y);
 
         if (is_simple) {
-          block.type = BLOCK_SIMPLE;
-          block.z = new_z;
+          m_buffer.set_block_type(x, y, BLOCK_SIMPLE);
+          m_buffer.set_block_height(x, y, new_z);
         } else {
-          block.type = BLOCK_COMPLEX;
+          m_buffer.set_block_type(x, y, BLOCK_COMPLEX);
         }
       }
     }
@@ -33,7 +32,7 @@ void Optimizer::optimize() {
 auto Optimizer::is_multilayer_block(int x, int y) const -> bool {
   for (auto cx = 0; cx < BLOCK_WIDTH_CELLS; ++cx) {
     for (auto cy = 0; cy < BLOCK_HEIGHT_CELLS; ++cy) {
-      const auto &column = m_buffer.column(x, y, cx, cy);
+      const auto column = m_buffer.column(x, y, cx, cy);
 
       ASSERT(column.layers > 0, "Geodata",
              "Column must have at least one layer: "
@@ -50,12 +49,12 @@ auto Optimizer::is_multilayer_block(int x, int y) const -> bool {
 }
 
 auto Optimizer::is_simple_block(int x, int y) const -> std::pair<bool, int> {
-  auto min_z = 0xffff;
-  auto max_z = -0xffff;
+  auto min_z = std::numeric_limits<std::int16_t>::max();
+  auto max_z = std::numeric_limits<std::int16_t>::min();
 
   for (auto cx = 0; cx < BLOCK_WIDTH_CELLS; ++cx) {
     for (auto cy = 0; cy < BLOCK_HEIGHT_CELLS; ++cy) {
-      const auto &cell = m_buffer.cell(x, y, cx, cy);
+      const auto cell = m_buffer.cell(x, y, cx, cy);
 
       if (!cell.north || !cell.south || !cell.west || !cell.east) {
         return {false, 0};

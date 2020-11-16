@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ExportBuffer.h"
 #include "Geodata.h"
 
 #include <filesystem>
@@ -16,6 +17,8 @@ public:
 
 private:
   std::filesystem::path m_root_path;
+
+  mutable ExportBuffer m_export_buffer;
 };
 
 } // namespace geodata

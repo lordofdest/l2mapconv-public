@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ExportBuffer.h"
+#include <geodata/ExportBuffer.h>
 
 #include <utility>
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 namespace geodata {
@@ -18,9 +19,9 @@ enum BlockType {
 };
 
 struct Cell {
-  int x : 16;
-  int y : 16;
-  int z : 16;
+  std::int16_t x;
+  std::int16_t y;
+  std::int16_t z;
   BlockType type : 4;
   bool north : 1;
   bool south : 1;

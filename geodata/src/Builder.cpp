@@ -107,9 +107,9 @@ auto Builder::build(const Map &map, const BuilderSettings &settings) const
         const auto z = static_cast<int>(span->smax) - depth / 2 + 1;
 
         geodata.cells.push_back({
-            x,
-            y,
-            static_cast<int>(static_cast<float>(z) * cell_height) + 28,
+            static_cast<std::int16_t>(x),
+            static_cast<std::int16_t>(y),
+            static_cast<std::int16_t>(static_cast<float>(z) * cell_height + 28),
             BLOCK_MULTILAYER,
             (nswe & DIRECTION_N) != 0,
             (nswe & DIRECTION_W) != 0,
@@ -130,9 +130,9 @@ auto Builder::build(const Map &map, const BuilderSettings &settings) const
       }
 
       geodata.cells.push_back({
-          x,
-          y,
-          -16384,
+          static_cast<std::int16_t>(x),
+          static_cast<std::int16_t>(y),
+          -0x4000,
           BLOCK_COMPLEX,
           false,
           false,
