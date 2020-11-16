@@ -121,7 +121,7 @@ auto UnrealLoader::load_terrain_entities(
 
   const auto mesh = std::make_shared<EntityMesh>();
 
-  std::vector<std::uint16_t> heights((width + 1) * (height + 1));
+  std::vector<std::uint16_t> heights(full_width * full_height);
 
   {
     const auto position = to_vec3(terrain.position());
@@ -304,10 +304,10 @@ auto UnrealLoader::load_terrain_entities(
       for (auto x = 0; x < full_width; ++x) {
         const float z = heights[y * full_width + x];
 
-        auto top = y > 0 ? heights[(y - 1) * full_width + x] : z;
-        auto bottom = y < height ? heights[(y + 1) * full_width + x] : z;
-        auto left = x > 0 ? heights[y * full_width + (x - 1)] : z;
-        auto right = x < width ? heights[y * full_width + (x + 1)] : z;
+        const auto top = y > 0 ? heights[(y - 1) * full_width + x] : z;
+        const auto bottom = y < height ? heights[(y + 1) * full_width + x] : z;
+        const auto left = x > 0 ? heights[y * full_width + (x - 1)] : z;
+        const auto right = x < width ? heights[y * full_width + (x + 1)] : z;
 
         const auto normal = glm::normalize(
             glm::vec3{(left - right) / (full_width * 2.0f),
