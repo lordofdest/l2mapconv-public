@@ -23,10 +23,6 @@ void mark_triangles(float walkable_angle, float wall_angle,
                             glm::make_vec3(&vertices[triangle[1] * 3]),
                             glm::make_vec3(&vertices[triangle[2] * 3]));
 
-    if (normal.y < -wall_angle_radians) {
-      continue;
-    }
-
     if (normal.y < wall_angle_radians) {
       areas[i] = RC_WALL_AREA;
     } else if (normal.y < walkable_angle_radians) {

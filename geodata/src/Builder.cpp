@@ -85,6 +85,9 @@ auto Builder::build(const Map &map, const BuilderSettings &settings) const
 
   const auto depth = static_cast<int>((bb_max[2] - bb_min[2]) / cell_height);
 
+  std::vector<int> columns(destination_hf->width * destination_hf->height);
+  auto black_holes = 0;
+
   for (auto y = 0; y < destination_hf->height; ++y) {
     for (auto x = 0; x < destination_hf->width; ++x) {
       for (auto *span = destination_hf->spans[x + y * destination_hf->width];
@@ -95,6 +98,10 @@ auto Builder::build(const Map &map, const BuilderSettings &settings) const
 
         if (area == RC_NULL_AREA) {
           continue;
+        }
+
+        if (nswe == 0) {
+          black_holes++;
         }
 
         const auto z = static_cast<int>(span->smax) - depth / 2 + 1;
@@ -109,8 +116,35 @@ auto Builder::build(const Map &map, const BuilderSettings &settings) const
             (nswe & DIRECTION_E) != 0,
             (nswe & DIRECTION_S) != 0,
         });
+
+        columns[y * destination_hf->width + x]++;
       }
     }
+  }
+
+  // Add fake cells to columns with no layers.
+  for (auto y = 0; y < destination_hf->height; ++y) {
+    for (auto x = 0; x < destination_hf->width; ++x) {
+      if (columns[y * destination_hf->width + x] > 0) {
+        continue;
+      }
+
+      geodata.cells.push_back({
+          x,
+          y,
+          -16384,
+          BLOCK_COMPLEX,
+          false,
+          false,
+          false,
+          false,
+      });
+    }
+  }
+
+  if (black_holes > 0) {
+    utils::Log(utils::LOG_WARN)
+        << "Black holes (points of no return): " << black_holes << std::endl;
   }
 
   rcFreeHeightField(destination_hf);
